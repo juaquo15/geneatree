@@ -1,0 +1,18 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME <img src=x onerror="window.__xss=1"> /<script>window.__xss=2</script>/
+2 GIVN <img src=x onerror="window.__xss=1">
+2 SURN <script>window.__xss=2</script>
+1 SEX M
+1 BIRT
+2 DATE 1 Ene 1900
+2 PLAC javascript:window.__xss=3
+1 NOTE <script>window.__xss=4</script><a href="javascript:window.__xss=5">clic</a>
+2 CONT <svg onload="window.__xss=6"></svg>
+1 OBJE
+2 FILE javascript:window.__xss=7
+2 TITL <b onmouseover="window.__xss=8">foto</b>
+0 TRLR

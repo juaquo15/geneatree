@@ -36,8 +36,8 @@ Si algo se atrasa, se recorta en este orden: H4 reportes → H4 fotos → H3 ins
 - ✅ Vistas Familia, Pedigrí, Individuos; ficha de persona; IndexedDB
 - ✅ CI en GitHub Actions: tipos, tests, build, auditoría, secretos, guardia de datos
 - ✅ Dependabot y `SECURITY.md`
-- 🔜 Publicar el repo y activar GitHub Pages (demo **sin datos**: cada visitante carga su propio GEDCOM)
-- ⬜ Tests e2e con Playwright sobre `tests/fixtures` (ver catálogo F-*)
+- ✅ Publicar el repo · 🔜 activar GitHub Pages (demo **sin datos**: cada visitante carga su propio GEDCOM)
+- ✅ Tests e2e con Playwright sobre `tests/fixtures` (F-04..F-08, S-04, S-05), también en CI
 - ⬜ Fijar acciones de GitHub por SHA (Dependabot las mantiene)
 
 **Aceptación:** CI verde en `main`; la demo pública abre y carga el GEDCOM ficticio.
@@ -144,11 +144,11 @@ vista de descendencia · búsqueda fonética (Soundex) · reportes adicionales.
 | F-01 | Fechas: 47 formatos reales en español se interpretan; los inválidos no inventan fecha | unidad | ✅ |
 | F-02 | Importador: conteos, NSFX→materno, NPFX→título, CONC/CONT, `_UID`, tags conservados | unidad | ✅ |
 | F-03 | Importador contra archivo real (solo local, `GED_PATH`) sin referencias rotas | unidad | ✅ |
-| F-04 | Vista Familia muestra padres, cónyuge, hijos y matrimonio del fixture | e2e | ⬜ |
-| F-05 | Teclas F, M, C, Inicio, Ctrl+Inicio, Ctrl+S navegan como PAF | e2e | ⬜ |
-| F-06 | Pedigrí: 5 generaciones, flechas de continuación, RePág/AvPág | e2e | ⬜ |
-| F-07 | Individuos: orden por nombre/RIN, búsqueda por apellido y RIN | e2e | ⬜ |
-| F-08 | Recargar la página conserva el árbol (IndexedDB) | e2e | ⬜ |
+| F-04 | Vista Familia muestra padres, cónyuge, hijos y matrimonio del fixture | e2e | ✅ |
+| F-05 | Teclas F, M, C, Inicio, Ctrl+Inicio, Ctrl+S navegan como PAF | e2e | ✅ |
+| F-06 | Pedigrí: 5 generaciones, flechas de continuación, RePág/AvPág | e2e | ✅ |
+| F-07 | Individuos: orden por nombre/RIN, búsqueda por apellido y RIN | e2e | ✅ |
+| F-08 | Recargar la página conserva el árbol (IndexedDB) | e2e | ✅ |
 | F-10–19 | Edición: crear, editar, vincular, eliminar, deshacer, papelera | e2e | ⬜ |
 | F-30–35 | Offline: editar sin red, reabrir, sincronizar, resolver conflicto | e2e | ⬜ |
 | F-40 | Ida y vuelta GEDCOM sin pérdida | unidad | ⬜ |
@@ -162,8 +162,8 @@ vista de descendencia · búsqueda fonética (Soundex) · reportes adicionales.
 | S-01 | Ningún `.ged`/`.paf`/foto real entra al repo | CI (guardia de rutas) | ✅ |
 | S-02 | Sin secretos en el historial | CI (gitleaks) | ✅ |
 | S-03 | Dependencias sin vulnerabilidades altas/críticas | CI (`npm audit`) + Dependabot | ✅ |
-| S-04 | XSS: una nota GEDCOM con `<script>`, `<img onerror>` o `javascript:` se muestra como texto | unidad + e2e | 🔜 |
-| S-05 | CSP activa: sin scripts inline ni externos; `connect-src` solo a Supabase | e2e (lee cabecera/meta) | ⬜ |
+| S-04 | XSS: una nota GEDCOM con `<script>`, `<img onerror>` o `javascript:` se muestra como texto | e2e | ✅ |
+| S-05 | CSP activa: sin scripts inline ni externos; `connect-src` solo a Supabase | e2e | ✅ (falta agregar Supabase en H2) |
 | S-06 | Usuario anónimo no lee ninguna tabla | integración (`geneatree-test`) | ⬜ |
 | S-07 | Usuario de otro árbol no lee ni escribe este árbol | integración | ⬜ |
 | S-08 | `viewer` no puede escribir; no ve fechas/lugares/notas de vivos | integración | ⬜ |
