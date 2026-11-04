@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # S-01: ningún dato genealógico real puede entrar al repositorio.
+      - name: Guardia de datos personales
+        run: |
+          bad=$(git ls-files | grep -iE '\.(paf|ged)$|(^|/)genes/' | grep -v '^tests/fixtures/' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Archivos de datos reales en el repo:"; echo "$bad"; exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - name: Tipos
+        run: npm run check
+      - name: Tests (F-01..F-03)
+        run: npm test
+      - name: Build
+        run: npm run build
+
+      # S-14: la clave service_role nunca debe llegar al bundle.
+      - name: Sin secretos en el bundle
+        run: |
+          if grep -rIl -E 'service_role|SUPABASE_SERVICE' dist/; then
+            echo "::error::Posible secreto en dist/"; exit 1
+          fi
+
+      # S-03: dependencias de producción sin vulnerabilidades altas.
+      - name: Auditoría de dependencias
+        run: npm audit --omit=dev --audit-level=high
+
+  secrets:
+    # S-02: secretos en el historial.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
