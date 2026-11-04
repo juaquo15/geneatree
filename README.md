@@ -28,7 +28,7 @@ npm install
 npm run dev
 ```
 
-Abra http://localhost:5173 y cargue un archivo `.ged`
+Demo: https://geneatree.pages.dev · Local: abra http://localhost:5173 y cargue un archivo `.ged`
 (en PAF: *File → Export → GEDCOM 5.5*). Los datos se procesan y guardan
 **solo en su navegador**.
 

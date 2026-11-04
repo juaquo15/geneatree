@@ -1,0 +1,16 @@
+# Encabezados de seguridad para Cloudflare Pages.
+# Una sola regla para la CSP: si varias reglas coinciden, Cloudflare une los valores.
+# Al conectar Supabase (H2) se agrega su URL a connect-src.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Archivos con hash en el nombre: se pueden guardar en caché para siempre.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

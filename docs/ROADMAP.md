@@ -36,7 +36,9 @@ Si algo se atrasa, se recorta en este orden: H4 reportes → H4 fotos → H3 ins
 - ✅ Vistas Familia, Pedigrí, Individuos; ficha de persona; IndexedDB
 - ✅ CI en GitHub Actions: tipos, tests, build, auditoría, secretos, guardia de datos
 - ✅ Dependabot y `SECURITY.md`
-- ✅ Repo público y demo en https://juaquo15.github.io/geneatree/ (**sin datos**: cada visitante carga su propio GEDCOM)
+- ✅ Repo público y demo en https://geneatree.pages.dev (**sin datos**: cada visitante carga su propio GEDCOM)
+- 🔜 Encabezados de seguridad en el servidor (`public/_headers`: CSP con `frame-ancestors`,
+  HSTS, nosniff…) verificados en cada despliegue
 - ✅ Tests e2e con Playwright sobre `tests/fixtures` (F-04..F-08, S-04, S-05), también en CI
 - ⬜ Fijar acciones de GitHub por SHA (Dependabot las mantiene)
 
@@ -127,8 +129,8 @@ mismos datos; el GEDCOM exportado abre en PAF 5 sin errores.
 
 ### Dominio propio
 
-- ⬜ Salir de `juaquo15.github.io` antes de la entrega: dominio propio (p. ej. `.cl`)
-  servido desde GitHub Pages o Cloudflare Pages; actualizar CSP y URLs permitidas en Supabase Auth
+- 🔜 Migrar de `juaquo15.github.io` a Cloudflare Pages (`geneatree.pages.dev`) y apagar GitHub Pages
+- ⬜ Opcional: dominio propio conectado a Cloudflare Pages (actualizar URLs permitidas en Supabase Auth)
 
 ## H6 · Entrega (22–25 dic)
 
@@ -201,7 +203,8 @@ vista de descendencia · búsqueda fonética (Soundex) · reportes adicionales.
 ## Decisiones tomadas
 
 - **Svelte 5 + Vite + TypeScript**: el bundle más liviano (~30 KB gzip hoy).
-- **Supabase gratis + ping programado**; frontend en **GitHub Pages** (gratis, sin dominio).
+- **Supabase gratis + ping programado**; frontend en **Cloudflare Pages** (`geneatree.pages.dev`, gratis,
+  despliegue desde GitHub Actions solo si CI pasa).
 - **AGPL-3.0**.
 - Nunca se pierde lo escrito: fechas como texto original + interpretación; tags
   desconocidos guardados en `extra`.
