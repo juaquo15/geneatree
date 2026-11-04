@@ -11,6 +11,9 @@ updates:
       # svelte-check aún no soporta TypeScript 7 (peer ^5 || ^6)
       - dependency-name: typescript
         versions: ['>=7']
+      # Tipos alineados con Node 24 (el runtime usado en CI)
+      - dependency-name: '@types/node'
+        versions: ['>=25']
   - package-ecosystem: github-actions
     directory: /
     schedule:
