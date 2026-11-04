@@ -24,6 +24,12 @@ jobs:
             echo "::error::Archivos de datos reales en el repo:"; echo "$bad"; exit 1
           fi
 
+      # Caracteres de control invisibles en el código (salvo \t \n \r).
+      - name: Fuentes sin caracteres de control
+        run: |
+          bad=$(git ls-files 'src/**' 'tests/**' 'e2e/**' | grep -E '\.(ts|svelte|css)$' | xargs grep -lP '[\x00-\x08\x0b\x0c\x0e-\x1f]' || true)
+          if [ -n "$bad" ]; then echo "::error::Caracteres de control en:"; echo "$bad"; exit 1; fi
+
       - uses: actions/setup-node@v7
         with:
           node-version: 24

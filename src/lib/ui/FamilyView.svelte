@@ -11,6 +11,7 @@
     spouseIn,
   } from '../model/tree';
   import { birthDate, eventText, fullName, PEDIGREE_LABELS } from '../model/format';
+  import { moveChild } from '../model/edit';
   import PersonBox from './PersonBox.svelte';
 
   const t = $derived(app.tree!);
@@ -34,6 +35,16 @@
     app.makePrimary(id);
   }
 
+  const add = {
+    father: () => p && (app.dialog = { type: 'add-person', relation: { kind: 'father', childId: p.id } }),
+    mother: () => p && (app.dialog = { type: 'add-person', relation: { kind: 'mother', childId: p.id } }),
+    // Si la familia mostrada no tiene cónyuge, se completa esa misma familia.
+    spouse: () =>
+      p && (app.dialog = { type: 'add-person', relation: { kind: 'spouse', personId: p.id, familyId: fam && !spouse ? fam.id : undefined } }),
+    otherSpouse: () => p && (app.dialog = { type: 'add-person', relation: { kind: 'spouse', personId: p.id } }),
+    child: () => p && (app.dialog = { type: 'add-person', relation: { kind: 'child', parentId: p.id, familyId: fam?.id } }),
+  };
+
   function pedigreeOf(childId: string): string {
     const c = t.people.get(childId);
     const link = c?.parents.find((l) => l.familyId === fam?.id);
@@ -50,6 +61,12 @@
     const inLeft = leftCol.indexOf(sel);
     const inRight = rightCol.indexOf(sel);
     const move = (id: string | undefined) => id && (app.selectedId = id);
+    // Alt+↑/↓ reordena al hijo seleccionado
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && fam && fam.childIds.includes(sel)) {
+      const famId = fam.id;
+      app.edit('Mover hijo', (tx) => moveChild(tx, famId, sel, e.key === 'ArrowUp' ? -1 : 1));
+      return true;
+    }
     switch (e.key) {
       case 'ArrowDown':
         if (inLeft >= 0) move(leftCol[Math.min(inLeft + 1, leftCol.length - 1)]);
@@ -98,22 +115,27 @@
       <PersonBox person={p} />
     </div>
 
-    <div class="marriage">
-      {#if fam}
+    {#if fam}
+      <button type="button" class="marriage" onclick={() => (app.dialog = { type: 'edit-family', familyId: fam.id })} title="Editar matrimonio e hijos">
         Matrimonio: {eventText(marriage) || '—'}
-      {:else}
-        Sin cónyuge registrado
-      {/if}
-    </div>
+      </button>
+    {:else}
+      <div class="marriage">Sin cónyuge registrado</div>
+    {/if}
 
     <div class="spouse-label">
       <h2>Cónyuge {#if fams.length > 1}<small>({famIdx + 1} de {fams.length})</small>{/if}</h2>
-      {#if fams.length > 1}
-        <button class="mini" onclick={nextSpouse} title="Mostrar otro cónyuge" aria-label="Mostrar otro cónyuge">⇕</button>
-      {/if}
+      <span class="spouse-tools">
+        {#if spouse}
+          <button class="mini" onclick={add.otherSpouse} title="Agregar otro cónyuge">＋ Otro</button>
+        {/if}
+        {#if fams.length > 1}
+          <button class="mini" onclick={nextSpouse} title="Mostrar otro cónyuge" aria-label="Mostrar otro cónyuge">⇕</button>
+        {/if}
+      </span>
     </div>
     <div class="spouse">
-      <PersonBox person={spouse} placeholder="" />
+      <PersonBox person={spouse} placeholder="Cónyuge" onadd={add.spouse} />
     </div>
     {#if spouse}
       <button class="arrow spouse-arrow" onclick={() => app.makePrimary(spouse.id)} aria-label="Llevar cónyuge a posición principal">◂</button>
@@ -121,8 +143,8 @@
 
     <h2 class="parents-label">Padres</h2>
     <div class="connector" aria-hidden="true"></div>
-    <div class="dad"><PersonBox person={dad} placeholder="Padre" /></div>
-    <div class="mom"><PersonBox person={mom} placeholder="Madre" /></div>
+    <div class="dad"><PersonBox person={dad} placeholder="Padre" onadd={add.father} /></div>
+    <div class="mom"><PersonBox person={mom} placeholder="Madre" onadd={add.mother} /></div>
     {#if dad}
       <button class="arrow dad-arrow" onclick={() => app.makePrimary(dad.id)} aria-label="Llevar padre a posición principal (F)">▸</button>
     {/if}
@@ -149,7 +171,7 @@
               class="row"
               data-person={k.id}
               onclick={(e) => (e.ctrlKey ? toChild(k.id) : (app.selectedId = k.id))}
-              ondblclick={(e) => (e.ctrlKey ? toChild(k.id) : (app.sheetId = k.id))}
+              ondblclick={(e) => (e.ctrlKey ? toChild(k.id) : (app.dialog = { type: 'edit-person', personId: k.id }))}
             >
               <span class="num">{i + 1}</span>
               <span class="kname">{fullName(k)}{#if k.notes.trim() || k.media.length}<span class="dot" aria-label="Tiene notas">▪</span>{/if}</span>
@@ -157,9 +179,12 @@
               <span class="link">{pedigreeOf(k.id)}</span>
             </button>
           </li>
-        {:else}
-          <li class="none">—</li>
         {/each}
+        <li class="add-row">
+          <button type="button" class="row add" onclick={add.child}>
+            <span class="num"></span><span>＋ Agregar hijo/a</span>
+          </button>
+        </li>
       </ol>
     </div>
   </section>
@@ -207,6 +232,11 @@
     padding-left: 0.4em;
   }
   .spouse-label small { font-weight: 400; color: var(--muted); }
+  .spouse-tools { display: flex; gap: 0.3em; }
+  button.marriage { font: inherit; color: inherit; text-align: left; cursor: pointer; }
+  button.marriage:hover { border-style: dashed; }
+  .row.add { color: var(--muted); }
+  .row.add:hover { color: var(--ink); }
   .spouse { grid-area: spouse; }
   .spouse-arrow { grid-area: spa; }
   .parents-label { grid-area: plabel; padding-left: 0.4em; align-self: end; }
@@ -312,7 +342,6 @@
   .row:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
   .kname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dot { margin-left: 0.3em; font-size: 0.8em; }
-  .none { padding: 0.3em 0.6em 0.3em 2.8em; color: var(--muted); }
 
   @media (max-width: 760px) {
     .family {

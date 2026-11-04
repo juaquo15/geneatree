@@ -17,6 +17,7 @@
   --info-bg: #e6f0fa;
   --warn-bg: #fff1c2;
   --warn-ink: #5c4300;
+  --danger: #b00020;
   color-scheme: light;
 }
 
@@ -36,6 +37,7 @@
     --info-bg: #1f3347;
     --warn-bg: #4a3b10;
     --warn-ink: #ffe7a3;
+    --danger: #ff8a80;
     color-scheme: dark;
   }
 }
@@ -54,6 +56,7 @@
   --info-bg: #1f3347;
   --warn-bg: #4a3b10;
   --warn-ink: #ffe7a3;
+  --danger: #ff8a80;
   color-scheme: dark;
 }
 

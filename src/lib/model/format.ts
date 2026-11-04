@@ -21,6 +21,24 @@ export function fold(s: string): string {
     .trim();
 }
 
+const foldCache = new Map<string, string>();
+
+/**
+ * Minúsculas sin tildes conservando el largo exacto (para resaltar coincidencias
+ * en el texto original). Rápido: solo los caracteres no ASCII pasan por normalize.
+ */
+export function foldKeep(s: string): string {
+  return s.toLowerCase().replace(/[^\x00-\x7f]/g, (ch) => {
+    let r = foldCache.get(ch);
+    if (r === undefined) {
+      const base = ch.normalize('NFD')[0] ?? ch;
+      r = base.length === ch.length ? base : ch;
+      foldCache.set(ch, r);
+    }
+    return r;
+  });
+}
+
 export function eventText(e: LifeEvent | undefined): string {
   if (!e) return '';
   return [e.date?.text, e.place].filter(Boolean).join(' - ');

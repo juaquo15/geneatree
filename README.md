@@ -17,7 +17,7 @@ Fase 1 (prototipo local):
 - [x] Apellido materno guardado por PAF como sufijo (`NSFX`) → campo propio
 - [x] Vistas Familia, Pedigrí (5 generaciones) e Individuos (lista virtual + búsqueda)
 - [x] Copia local en IndexedDB: abre sin conexión y sin reimportar
-- [ ] Edición de personas, familias y notas
+- [x] Edición: personas, familias, notas, papelera, deshacer, búsqueda en notas
 - [ ] Sincronización con Supabase (roles dueño / editor / lector, RLS)
 - [ ] Fotos, reportes imprimibles, exportar GEDCOM, detección de duplicados
 

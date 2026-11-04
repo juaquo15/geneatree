@@ -9,7 +9,7 @@ test('F-04 vista Familia muestra padres, cónyuge, hijos y matrimonio', async ({
   await expect(primary(page)).toContainText('Juan Pablo Ficticio Inventado');
   await expect(primary(page)).toContainText('4 Ago 1924 - Pueblo Imaginario');
   await expect(page.locator('.dad')).toContainText('Capitán Diego Antiguo');
-  await expect(page.locator('.mom')).toContainText('Madre');
+  await expect(page.locator('.mom')).toContainText('＋ Agregar madre');
   await expect(page.locator('.spouse')).toContainText('María Ejemplo Prueba');
   await expect(page.locator('.marriage')).toContainText('Entre 1950 y 1952 - Pueblo Imaginario');
   await expect(page.locator('.children-list')).toContainText('Pedro Ficticio Ejemplo');
@@ -60,13 +60,10 @@ test('F-08 recargar conserva el árbol (IndexedDB)', async ({ page }) => {
   await expect(primary(page)).toContainText('Juan Pablo Ficticio Inventado');
 });
 
-test('ficha de persona: Enter abre, muestra notas y fecha por revisar', async ({ page }) => {
+test('Enter abre el editor con las notas; Esc lo cierra', async ({ page }) => {
   await page.keyboard.press('Enter');
-  const sheet = page.getByRole('dialog');
-  await expect(sheet).toContainText('Nació en un pueblo que no existe.');
+  const dlg = page.getByRole('dialog');
+  await expect(page.getByLabel('Notas', { exact: true })).toHaveValue('Nació en un pueblo que no existe.\nSegunda línea de la nota.');
   await page.keyboard.press('Escape');
-  await expect(sheet).toBeHidden();
-  await page.keyboard.press('f');
-  await page.keyboard.press('Enter');
-  await expect(page.getByRole('dialog')).toContainText('por revisar');
+  await expect(dlg).toBeHidden();
 });

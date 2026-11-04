@@ -28,6 +28,13 @@
 
   const selectedSlot = $derived(slots.findIndex((x, i) => i > 0 && x?.id === app.selectedId));
 
+  /** Agregar padre (n par) o madre (n impar) de quien ocupa el lugar n/2. */
+  function addParent(n: number) {
+    const child = slots[Math.floor(n / 2)];
+    if (!child) return;
+    app.dialog = { type: 'add-person', relation: { kind: n % 2 === 0 ? 'father' : 'mother', childId: child.id } };
+  }
+
   function select(n: number) {
     const x = slots[n];
     if (x) app.selectedId = x.id;
@@ -124,7 +131,7 @@
         style="grid-column:{2 * g + 2}; grid-row:{rowStart(n)} / span {rowSpan(n)}"
       >
         {#if slots[n] || (n > 1 && slots[Math.floor(n / 2)])}
-          <PersonBox person={slots[n]} placeholder={n % 2 === 0 ? 'Padre' : 'Madre'} compact={g >= 3} />
+          <PersonBox person={slots[n]} placeholder={n % 2 === 0 ? 'Padre' : 'Madre'} compact={g >= 3} onadd={() => addParent(n)} />
         {/if}
       </div>
       {#if g < GENS - 1 && slots[n]}

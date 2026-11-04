@@ -3,10 +3,15 @@
   import { app, type View } from './lib/store/app.svelte';
   import { clearTree } from './lib/store/persist';
   import { spouseFamilies, parentFamily } from './lib/model/tree';
+  import { unparsedDates } from './lib/model/review';
   import FamilyView from './lib/ui/FamilyView.svelte';
   import PedigreeView from './lib/ui/PedigreeView.svelte';
   import IndividualView from './lib/ui/IndividualView.svelte';
-  import PersonSheet from './lib/ui/PersonSheet.svelte';
+  import PersonEditor from './lib/ui/PersonEditor.svelte';
+  import FamilyEditor from './lib/ui/FamilyEditor.svelte';
+  import SearchDialog from './lib/ui/SearchDialog.svelte';
+  import ReviewDatesDialog from './lib/ui/ReviewDatesDialog.svelte';
+  import TrashDialog from './lib/ui/TrashDialog.svelte';
 
   let familyView: FamilyView | undefined = $state();
   let pedigreeView: PedigreeView | undefined = $state();
@@ -22,7 +27,15 @@
   ];
 
   function onKey(e: KeyboardEvent) {
-    if (app.status !== 'ready' || app.sheetId) return;
+    // Con un diálogo abierto, el diálogo maneja sus teclas (Esc cierra).
+    if (app.status !== 'ready' || app.dialog) return;
+    const target = e.target as HTMLElement;
+    const typing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
+    if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'z' && !typing) {
+      e.preventDefault();
+      app.undo();
+      return;
+    }
     // Atajos globales de PAF 5
     if (e.ctrlKey && e.key.toLowerCase() === 's') {
       e.preventDefault();
@@ -36,7 +49,7 @@
     }
     if (e.ctrlKey && e.key.toLowerCase() === 'f') {
       e.preventDefault();
-      app.view = 'individual';
+      app.dialog = { type: 'search' };
       return;
     }
     if (e.altKey && e.key === 'ArrowLeft') {
@@ -44,12 +57,11 @@
       app.back();
       return;
     }
-    const target = e.target as HTMLElement;
-    const typing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
     if (typing && app.view !== 'individual') return;
-    if (e.key === 'Enter' && !e.ctrlKey && app.view !== 'individual' && app.selectedId) {
+    // Enter edita a la persona seleccionada (en PAF: doble clic / Editar)
+    if (e.key === 'Enter' && !e.ctrlKey && app.view !== 'individual' && app.selectedId && !target.closest('button.add, button.marriage, .row.add')) {
       e.preventDefault();
-      app.sheetId = app.selectedId;
+      app.dialog = { type: 'edit-person', personId: app.selectedId };
       return;
     }
     const view = app.view === 'family' ? familyView : app.view === 'pedigree' ? pedigreeView : individualView;
@@ -63,9 +75,21 @@
   }
 
   function onFile(e: Event) {
-    const f = (e.currentTarget as HTMLInputElement).files?.[0];
-    if (f) app.importFile(f);
+    const input = e.currentTarget as HTMLInputElement;
+    const f = input.files?.[0];
+    input.value = '';
+    if (!f) return;
+    if (app.status === 'ready' && !confirm('Importar reemplazará el árbol de este navegador, incluidos los cambios y la papelera. ¿Continuar?')) return;
+    app.importFile(f);
   }
+
+  // Lugares ya usados, para autocompletar al editar.
+  const places = $derived.by(() => {
+    const set = new Set<string>();
+    if (app.tree) for (const p of app.tree.people.values()) for (const ev of p.events) if (ev.place) set.add(ev.place);
+    return [...set].sort((a, b) => a.localeCompare(b, 'es'));
+  });
+  const reviewCount = $derived(app.tree ? unparsedDates(app.tree).length : 0);
 
   async function forget() {
     if (!confirm('¿Borrar la copia del árbol guardada en este navegador? El archivo GEDCOM original no se toca.')) return;
@@ -96,7 +120,14 @@
     {#if app.status === 'ready'}
       <button onclick={() => app.goHome()} title="Ir a la persona inicial (Ctrl+Inicio)">⌂ Inicio</button>
       <button onclick={() => app.back()} title="Volver (Alt+←)">← Volver</button>
-      <button onclick={() => (app.view = 'individual')} title="Buscar persona (Ctrl+F)">Buscar</button>
+      <button onclick={() => (app.dialog = { type: 'search' })} title="Buscar en nombres, lugares y notas (Ctrl+F)">Buscar</button>
+      <button onclick={() => (app.dialog = { type: 'add-person', relation: { kind: 'none' } })}>＋ Persona</button>
+      <button onclick={() => app.undo()} disabled={!app.undoLabel} title={app.undoLabel ? `Deshacer: ${app.undoLabel} (Ctrl+Z)` : 'Nada que deshacer'}>↶ Deshacer</button>
+      {#if reviewCount}
+        <button onclick={() => (app.dialog = { type: 'review-dates' })}>Fechas por revisar ({reviewCount})</button>
+      {/if}
+      <button onclick={() => (app.dialog = { type: 'trash' })}>Papelera</button>
+      <span class="saved" aria-live="polite">{app.saving ? 'Guardando…' : app.undoLabel ? 'Guardado ✓' : ''}</span>
     {/if}
     <span class="spacer"></span>
     <button onclick={() => app.zoom(-0.1)} aria-label="Letra más chica">A−</button>
@@ -116,8 +147,8 @@
       {/each}
       <span class="tabs-hint">Ctrl+S cambia de vista</span>
     </nav>
-    {#if app.importReport}
-      <p class="banner">{app.importReport} <button onclick={() => (app.importReport = '')}>Entendido</button></p>
+    {#if app.notice}
+      <p class="banner" role="status">{app.notice} <button onclick={() => (app.notice = '')}>Entendido</button></p>
     {/if}
     {#if app.error}<p class="banner error">{app.error}</p>{/if}
     <main>
@@ -130,7 +161,7 @@
       {/if}
     </main>
     <footer class="statusbar">
-      <span>Doble clic: ver ficha · F padre · M madre · C hijo · Ctrl+Inicio persona inicial</span>
+      <span>Enter o doble clic: editar · F padre · M madre · C hijo · Ctrl+Z deshacer · Ctrl+F buscar</span>
       <span class="spacer"></span>
       {#if status}
         <span>RIN: {status.rin}</span>
@@ -139,7 +170,22 @@
         <span>H: {status.children}</span>
       {/if}
     </footer>
-    <PersonSheet />
+    <datalist id="places">
+      {#each places as pl}<option value={pl}></option>{/each}
+    </datalist>
+    {#if app.dialog?.type === 'edit-person'}
+      {#key app.dialog.personId}<PersonEditor personId={app.dialog.personId} />{/key}
+    {:else if app.dialog?.type === 'add-person'}
+      <PersonEditor relation={app.dialog.relation} />
+    {:else if app.dialog?.type === 'edit-family'}
+      {#key app.dialog.familyId}<FamilyEditor familyId={app.dialog.familyId} />{/key}
+    {:else if app.dialog?.type === 'search'}
+      <SearchDialog />
+    {:else if app.dialog?.type === 'review-dates'}
+      <ReviewDatesDialog />
+    {:else if app.dialog?.type === 'trash'}
+      <TrashDialog />
+    {/if}
   {:else}
     <main class="welcome">
       {#if app.status === 'loading'}
@@ -177,6 +223,8 @@
   .toolbar { border-bottom: 1px solid var(--line-soft); font-size: 0.8em; }
   .brand { margin-right: 1em; }
   .spacer { flex: 1; }
+  .saved { color: var(--muted); min-width: 6em; }
+  .toolbar button:disabled { opacity: 0.5; cursor: default; }
   button { font: inherit; }
   .toolbar button {
     padding: 0.15em 0.6em;

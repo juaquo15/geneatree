@@ -8,8 +8,10 @@
     /** Texto si no hay persona (p.ej. "Padre"). */
     placeholder?: string;
     compact?: boolean;
+    /** Si el lugar está vacío, muestra un botón para agregar a alguien. */
+    onadd?: () => void;
   }
-  let { person, placeholder = '', compact = false }: Props = $props();
+  let { person, placeholder = '', compact = false, onadd }: Props = $props();
 
   const birth = $derived(person ? birthSummary(person) : undefined);
   const death = $derived(person ? deathSummary(person) : undefined);
@@ -24,8 +26,8 @@
     class:selected={app.selectedId === person.id}
     data-person={person.id}
     onclick={(e) => (e.ctrlKey ? app.makePrimary(person.id) : (app.selectedId = person.id))}
-    ondblclick={(e) => (e.ctrlKey ? app.makePrimary(person.id) : (app.sheetId = person.id))}
-    title="Doble clic: ver ficha · Ctrl+clic: llevar a posición principal"
+    ondblclick={(e) => (e.ctrlKey ? app.makePrimary(person.id) : (app.dialog = { type: 'edit-person', personId: person.id }))}
+    title="Doble clic o Enter: editar · Ctrl+clic: llevar a posición principal"
   >
     {#if flagged}<span class="flag" aria-label="Tiene notas o fotos"></span>{/if}
     <span class="name">{fullName(person)}</span>
@@ -36,6 +38,8 @@
       {#if death?.text}<span class="line">{death.text}{death.fromAlt ? ' *' : ''}</span>{/if}
     {/if}
   </button>
+{:else if onadd}
+  <button type="button" class="box empty add" class:compact onclick={onadd}>＋ Agregar {placeholder.toLowerCase()}</button>
 {:else}
   <div class="box empty" class:compact>{placeholder}</div>
 {/if}
@@ -68,6 +72,14 @@
   .box.empty {
     color: var(--muted);
     cursor: default;
+  }
+  .box.add {
+    cursor: pointer;
+    border-style: dashed;
+    justify-content: center;
+  }
+  .box.add:hover {
+    color: var(--ink);
   }
   .box.selected {
     background: var(--sel);

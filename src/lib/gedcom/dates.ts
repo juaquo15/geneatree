@@ -177,3 +177,40 @@ function withRange(text: string, qualifier: DateQualifier, a: Point, b: Point): 
 export function dateYear(d: ParsedDate | undefined): number | undefined {
   return d?.ok ? d.year : undefined;
 }
+
+const MONTH_NAMES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
+function describePoint(day?: number, month?: number, year?: number): string {
+  const parts: string[] = [];
+  if (day && month) parts.push(`${day} de`);
+  if (month) parts.push(`${MONTH_NAMES[month - 1]} de`);
+  if (year) parts.push(String(year));
+  return parts.join(' ');
+}
+
+/** Cómo entendió la app la fecha, en palabras: "4 de agosto de 1924", "aprox. 1792". */
+export function describeDate(d: ParsedDate): string | null {
+  if (!d.ok) return null;
+  const a = describePoint(d.day, d.month, d.year);
+  // Segundo extremo hereda mes/año si no los tiene ("3 o 7 Sep 1732").
+  const b = describePoint(d.day2, d.month2 ?? (d.day2 ? d.month : undefined), d.year2 ?? (d.day2 || d.month2 ? d.year : undefined));
+  switch (d.qualifier) {
+    case 'about':
+      return `aproximadamente ${a}`;
+    case 'before':
+      return `antes de ${a}`;
+    case 'after':
+      return `después de ${a}`;
+    case 'between':
+      return `entre ${a} y ${b}`;
+    case 'or':
+      // Mismo mes y año, distinto día: "3 o 7 de septiembre de 1732"
+      if (d.day && d.day2 && d.month === d.month2 && d.year === d.year2) return `${d.day} o ${b}`;
+      return `${a} o ${b}`;
+    default:
+      return a;
+  }
+}

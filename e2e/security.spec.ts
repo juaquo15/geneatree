@@ -19,11 +19,19 @@ test('S-04 contenido malicioso en el GEDCOM se muestra como texto', async ({ pag
   await expect(primary(page)).toContainText('<img src=x onerror="window.__xss=1">');
   await primary(page).dblclick();
   const sheet = page.getByRole('dialog');
-  await expect(sheet).toContainText('<script>window.__xss=4</script>');
-  await expect(sheet).toContainText('javascript:window.__xss=3');
+  await expect(sheet.getByLabel('Nombres', { exact: true })).toHaveValue('<img src=x onerror="window.__xss=1">');
+  await expect(sheet.getByLabel('Notas', { exact: true })).toHaveValue(/<script>window.__xss=4<\/script>/);
+  await expect(sheet.getByLabel('Lugar de Nacimiento', { exact: true })).toHaveValue('javascript:window.__xss=3');
+  await expect(sheet).toContainText('<b onmouseover="window.__xss=8">foto</b>');
   // Nada del contenido se convirtió en elementos HTML
   await expect(sheet.locator('img, script, svg, a[href^="javascript"], b')).toHaveCount(0);
-  await page.getByText('<b onmouseover').hover();
+  await sheet.getByText('<b onmouseover').hover();
+  // Buscar también muestra fragmentos de notas: deben seguir siendo texto
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Control+f');
+  await page.getByLabel('Buscar', { exact: true }).fill('script');
+  await expect(page.getByRole('dialog').locator('mark')).toHaveText('script');
+  await expect(page.getByRole('dialog').locator('script, img, svg')).toHaveCount(0);
   expect(await page.evaluate(() => window.__xss)).toBeUndefined();
   expect(dialogs).toEqual([]);
 });

@@ -46,18 +46,23 @@ Si algo se atrasa, se recorta en este orden: H4 reportes → H4 fotos → H3 ins
 
 Todo local primero (IndexedDB); la nube llega en H2/H3 sin cambiar la UI.
 
-- ⬜ Pantalla "Editar individuo" al estilo PAF: nombres, apellido paterno/materno,
-  título, sexo, eventos (nacimiento, bautizo, defunción, sepultación + otros)
-- ⬜ Campo fecha con interpretación en vivo ("4 Ago 1924 → 4 de agosto de 1924 ✓")
-  y aviso si no se entiende (se guarda igual, como hoy)
-- ⬜ Editor de notas grande, con búsqueda dentro de la nota
-- ⬜ Agregar: padre, madre, cónyuge, hijo; persona sin vínculos
-- ⬜ Vincular/desvincular existentes (con búsqueda), ordenar hijos
-- ⬜ Eliminar persona/familia con confirmación y papelera (recuperable 30 días)
-- ⬜ Deshacer (Ctrl+Z) de la última acción
-- ⬜ Registro de cambios local (quién, qué, cuándo, valor anterior)
-- ⬜ Lista "Fechas por revisar" (hoy 79) con salto a la persona
-- ⬜ Búsqueda que incluya notas (Ctrl+F) con resultados resaltados
+- ✅ Pantalla "Editar individuo" al estilo PAF (Enter o doble clic): nombres, apellido
+  paterno/materno, título, sexo, apodo, sufijo, eventos estándar + otros, notas
+- ✅ Campo fecha con interpretación en vivo ("4 Ago 1924 → ✓ 4 de agosto de 1924")
+  y aviso si no se entiende (se guarda igual)
+- ✅ Agregar padre, madre, cónyuge, hijo (apellidos sugeridos según costumbre hispana)
+  o persona sin vínculos; botones "＋ Agregar" en lugares vacíos de Familia y Pedigrí
+- ✅ Vincular personas existentes (buscador), eligiendo el matrimonio cuando hay varios
+- ✅ Editar matrimonio/divorcio y notas de familia; quitar cónyuges/hijos; ordenar hijos
+  (↑↓, Alt+↑/↓, "Ordenar por nacimiento")
+- ✅ Eliminar persona con confirmación → Papelera (30 días) → Restaurar con sus vínculos
+- ✅ Deshacer (Ctrl+Z, últimas 50 acciones de la sesión)
+- ✅ Registro de cambios local con estado antes/después de cada edición
+- ✅ Lista "Fechas por revisar" con salto al editor
+- ✅ Búsqueda en nombres, lugares y notas (Ctrl+F) con fragmento resaltado
+- ✅ Guardado incremental en IndexedDB (solo registros tocados) + indicador "Guardado ✓"
+- ⬜ Ver el historial de cambios en pantalla (los datos ya se guardan; la UI va con H3)
+- ⬜ Aceptación A-05 contra PAF (crear 3 generaciones sin mouse): se hace en H5
 
 **Aceptación:** catálogo F-10 a F-19 verde; se puede reproducir en la app, sin mouse,
 la creación de una familia de 3 generaciones hecha en PAF y el resultado coincide.
@@ -120,6 +125,11 @@ mismos datos; el GEDCOM exportado abre en PAF 5 sin errores.
 - ⬜ Prueba de aceptación completa contra PAF (A-*), con capturas lado a lado
 - ⬜ Guía de una página en español, letra grande, imprimible (va con el regalo)
 
+### Dominio propio
+
+- ⬜ Salir de `juaquo15.github.io` antes de la entrega: dominio propio (p. ej. `.cl`)
+  servido desde GitHub Pages o Cloudflare Pages; actualizar CSP y URLs permitidas en Supabase Auth
+
 ## H6 · Entrega (22–25 dic)
 
 1. Pedir al usuario un **último export GEDCOM** de PAF (él sigue editando hasta entonces)
@@ -149,11 +159,12 @@ vista de descendencia · búsqueda fonética (Soundex) · reportes adicionales.
 | F-06 | Pedigrí: 5 generaciones, flechas de continuación, RePág/AvPág | e2e | ✅ |
 | F-07 | Individuos: orden por nombre/RIN, búsqueda por apellido y RIN | e2e | ✅ |
 | F-08 | Recargar la página conserva el árbol (IndexedDB) | e2e | ✅ |
-| F-10–19 | Edición: crear, editar, vincular, eliminar, deshacer, papelera | e2e | ⬜ |
+| F-10–19 | Edición: editar, fecha en vivo, agregar madre/hijo, vincular existente, papelera, deshacer, persistencia, buscar en notas, fechas por revisar | e2e | ✅ |
+| F-20 | Motor de edición: vínculos siempre bidireccionales, deshacer exacto, restaurar sin pisar ediciones posteriores | unidad | ✅ |
 | F-30–35 | Offline: editar sin red, reabrir, sincronizar, resolver conflicto | e2e | ⬜ |
 | F-40 | Ida y vuelta GEDCOM sin pérdida | unidad | ⬜ |
 | F-41 | Migración idempotente: correrla dos veces no duplica | integración | ⬜ |
-| P-01 | Rendimiento con 32k personas sintéticas y CPU ×6 dentro de metas | e2e | ⬜ |
+| P-01 | Archivo real (32k) con CPU ×6: abrir 1,6 s · navegar 31 ms · buscar en notas 0,5 s · guardar 0,4 s | e2e local (`GED_PATH`) | ✅ |
 
 ### Seguridad
 

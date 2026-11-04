@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseDate } from '../src/lib/gedcom/dates';
+import { describeDate, parseDate } from '../src/lib/gedcom/dates';
 
 // Casos tomados de formatos reales escritos en PAF (sin datos personales).
 const cases: [string, Partial<ReturnType<typeof parseDate>>][] = [
@@ -73,5 +73,24 @@ describe('parseDate', () => {
     expect(d.ok).toBe(false);
     expect(d.text).toBe(text);
     expect(d.sort).toBeNull();
+  });
+});
+
+describe('describeDate', () => {
+  it.each([
+    ['4 Ago 1924', '4 de agosto de 1924'],
+    ['Nov 1956', 'noviembre de 1956'],
+    ['1792', '1792'],
+    ['Por 1792', 'aproximadamente 1792'],
+    ['Antes del 9 Sep 1707', 'antes de 9 de septiembre de 1707'],
+    ['Entre 1774 y 1776', 'entre 1774 y 1776'],
+    ['3 o 7 Sep 1732', '3 o 7 de septiembre de 1732'],
+    ['1703 ó 1705', '1703 o 1705'],
+  ])('%s → %s', (text, expected) => {
+    expect(describeDate(parseDate(text))).toBe(expected);
+  });
+
+  it('devuelve null si no se entiende', () => {
+    expect(describeDate(parseDate('La Serena'))).toBeNull();
   });
 });
