@@ -1,0 +1,79 @@
+/* Estética cercana a PAF 5: fondo claro, cajas con borde negro, selección azul,
+   letra grande por defecto (el usuario puede ajustarla con A− / A+). */
+:root {
+  --base: 20px;
+  --bg: #f0f0f0;
+  --chrome: #f7f7f7;
+  --box: #ffffff;
+  --ink: #000000;
+  --muted: #5a5a5a;
+  --line: #000000;
+  --line-soft: #a0a0a0;
+  --btn: #e9e9e9;
+  --sel: #0078d7;
+  --sel-ink: #ffffff;
+  --focus: #ffb000;
+  --link: #0050a0;
+  --info-bg: #e6f0fa;
+  --warn-bg: #fff1c2;
+  --warn-ink: #5c4300;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1d1f21;
+    --chrome: #26292c;
+    --box: #2b2e31;
+    --ink: #f2f2f2;
+    --muted: #b0b0b0;
+    --line: #c8c8c8;
+    --line-soft: #5a5f63;
+    --btn: #3a3e42;
+    --sel: #2f7fd1;
+    --sel-ink: #ffffff;
+    --link: #8cc4ff;
+    --info-bg: #1f3347;
+    --warn-bg: #4a3b10;
+    --warn-ink: #ffe7a3;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #1d1f21;
+  --chrome: #26292c;
+  --box: #2b2e31;
+  --ink: #f2f2f2;
+  --muted: #b0b0b0;
+  --line: #c8c8c8;
+  --line-soft: #5a5f63;
+  --btn: #3a3e42;
+  --sel: #2f7fd1;
+  --sel-ink: #ffffff;
+  --link: #8cc4ff;
+  --info-bg: #1f3347;
+  --warn-bg: #4a3b10;
+  --warn-ink: #ffe7a3;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --base: 17px;
+  }
+}

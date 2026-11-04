@@ -1,0 +1,29 @@
+# --- Datos genealógicos reales: NUNCA al repositorio ---
+# Contienen información personal de personas vivas.
+*.paf
+*.ged
+*.GED
+*.PAF
+genes/
+private/
+# Las pruebas usan solo datos inventados en tests/fixtures
+!tests/fixtures/*.ged
+
+# Dependencias y build
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+supabase/.temp/
+
+# Editor / SO
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

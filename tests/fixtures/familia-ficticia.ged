@@ -1,0 +1,77 @@
+0 HEAD
+1 SOUR PAF
+2 VERS 5.2.18.0
+1 GEDC
+2 VERS 5.5
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Juan Pablo /Ficticio/ Inventado
+2 SURN Ficticio
+2 GIVN Juan Pablo
+2 NSFX Inventado
+1 SEX M
+1 BIRT
+2 DATE 4 Ago 1924
+2 PLAC Pueblo Imaginario
+1 _UID AAAA0000000000000000000000000000AAAA
+1 FAMS @F1@
+1 FAMC @F2@
+1 NOTE Nació en un pueblo que no ex
+2 CONC iste.
+2 CONT Segunda línea de la nota.
+1 OBJE
+2 FORM jpg
+2 FILE genes\2005-05-27\Foto Ficticia.JPG
+2 TITL Foto
+2 _PRIM Y
+2 _TYPE PHOTO
+1 CHAN
+2 DATE 1 Jan 2020
+3 TIME 10:00:00
+0 @I2@ INDI
+1 NAME María /Ejemplo/ Prueba
+2 SURN Ejemplo
+2 GIVN María
+2 NSFX Prueba
+1 SEX F
+1 BIRT
+2 DATE Por 1930
+1 FAMS @F1@
+0 @I3@ INDI
+1 NAME Pedro /Ficticio/ Ejemplo
+2 SURN Ficticio
+2 GIVN Pedro
+2 NSFX Ejemplo
+1 SEX M
+1 BIRT
+2 DATE 1º Ene 1955
+1 FAMC @F1@
+2 PEDI birth
+0 @I4@ INDI
+1 NAME Capitán Diego /Antiguo/
+2 NPFX Capitán
+2 SURN Antiguo
+1 SEX M
+1 DEAT
+2 DATE La Serena
+1 FAMS @F2@
+1 _CUSTOM valor raro
+0 @I5@ INDI
+1 NAME José /Hijo/ Jr.
+2 SURN Hijo
+2 GIVN José
+2 NSFX Jr.
+1 SEX M
+0 @F1@ FAM
+1 _UID BBBB0000000000000000000000000000BBBB
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I3@
+1 MARR
+2 DATE Entre 1950 y 1952
+2 PLAC Pueblo Imaginario
+0 @F2@ FAM
+1 HUSB @I4@
+1 CHIL @I1@
+1 CHIL @I99@
+0 TRLR
