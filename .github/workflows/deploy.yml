@@ -40,7 +40,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: '4.157.0'
           # El proyecto debe existir antes del primer despliegue.
           preCommands: |
             wrangler pages project list | grep -qw geneatree || wrangler pages project create geneatree --production-branch=main
