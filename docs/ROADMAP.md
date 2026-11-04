@@ -36,7 +36,7 @@ Si algo se atrasa, se recorta en este orden: H4 reportes → H4 fotos → H3 ins
 - ✅ Vistas Familia, Pedigrí, Individuos; ficha de persona; IndexedDB
 - ✅ CI en GitHub Actions: tipos, tests, build, auditoría, secretos, guardia de datos
 - ✅ Dependabot y `SECURITY.md`
-- ✅ Publicar el repo · 🔜 activar GitHub Pages (demo **sin datos**: cada visitante carga su propio GEDCOM)
+- ✅ Repo público y demo en https://juaquo15.github.io/geneatree/ (**sin datos**: cada visitante carga su propio GEDCOM)
 - ✅ Tests e2e con Playwright sobre `tests/fixtures` (F-04..F-08, S-04, S-05), también en CI
 - ⬜ Fijar acciones de GitHub por SHA (Dependabot las mantiene)
 
