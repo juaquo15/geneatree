@@ -56,12 +56,13 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       # S-05 (servidor): los encabezados de seguridad llegan en la respuesta real.
+      # Se consulta la URL principal: el certificado de la URL de cada despliegue tarda en activarse.
       - name: Verificar encabezados de seguridad
         env:
-          URL: ${{ steps.cf.outputs.deployment-url }}
+          URL: https://geneatree.pages.dev
         run: |
           sleep 10
-          h=$(curl -sSI "$URL")
+          h=$(curl -sSI --retry 6 --retry-delay 10 --retry-all-errors "$URL")
           echo "$h"
           for needle in "frame-ancestors 'none'" "script-src 'self'" "x-content-type-options: nosniff" "strict-transport-security"; do
             echo "$h" | grep -qi "$needle" || { echo "::error::Falta en la respuesta: $needle"; exit 1; }
