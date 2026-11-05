@@ -23,7 +23,8 @@
 
   const gen = (n: number) => Math.floor(Math.log2(n));
   const rowSpan = (n: number) => 2 ** (GENS - 1 - gen(n));
-  const rowStart = (n: number) => (n - 2 ** gen(n)) * rowSpan(n) + 1;
+  const rowStart = (n: number) => (n - 2 ** gen(n)) * rowSpan(n) + 2;
+  const GEN_LABELS = ['1ª', '2ª', '3ª', '4ª', '5ª'];
   const numbers = Array.from({ length: SLOTS - 1 }, (_, i) => i + 1);
 
   const selectedSlot = $derived(slots.findIndex((x, i) => i > 0 && x?.id === app.selectedId));
@@ -119,6 +120,9 @@
 
 {#if p}
   <section class="pedigree" aria-label="Vista de pedigrí" style="--gens:{GENS}">
+    {#each GEN_LABELS as label, g (g)}
+      <h2 class="gen-label g{g}" style="grid-column:{2 * g + 2}; grid-row:1">{label}</h2>
+    {/each}
     <div class="child-nav">
       {#if canGoChild}
         <button class="arrow" onclick={goChild} aria-label="Ir a un hijo (C)" title="Ir a un hijo (C)">◂</button>
@@ -130,11 +134,14 @@
         class="slot g{g}"
         style="grid-column:{2 * g + 2}; grid-row:{rowStart(n)} / span {rowSpan(n)}"
       >
-        {#if slots[n] || (n > 1 && slots[Math.floor(n / 2)])}
-          <PersonBox person={slots[n]} placeholder={n % 2 === 0 ? 'Padre' : 'Madre'} compact={g >= 3} onadd={() => addParent(n)} />
-        {/if}
+        <PersonBox
+          person={slots[n]}
+          placeholder={n % 2 === 0 ? 'Padre' : 'Madre'}
+          nameOnly
+          onadd={n > 1 && slots[Math.floor(n / 2)] ? () => addParent(n) : undefined}
+        />
       </div>
-      {#if g < GENS - 1 && slots[n]}
+      {#if g < GENS - 1}
         <div class="bracket" style="grid-column:{2 * g + 3}; grid-row:{rowStart(n)} / span {rowSpan(n)}" aria-hidden="true"></div>
       {/if}
       {#if g === GENS - 1 && slots[n] && hasAncestors(t, slots[n]!)}
@@ -151,20 +158,26 @@
     display: grid;
     grid-template-columns:
       2.4em
-      minmax(0, 1.25fr) 1.2em
-      minmax(0, 1.2fr) 1.2em
-      minmax(0, 1.1fr) 1.2em
+      minmax(0, 1fr) 1.2em
+      minmax(0, 1fr) 1.2em
+      minmax(0, 1fr) 1.2em
       minmax(0, 1fr) 1.2em
       minmax(0, 1fr) 2.4em;
-    grid-template-rows: repeat(16, minmax(2.3em, 1fr));
+    grid-template-rows: auto repeat(16, minmax(2.3em, 1fr));
     padding: 1em 0.5em;
     height: 100%;
     min-height: 0;
     overflow: auto;
   }
+  .gen-label {
+    margin: 0 0 0.3em;
+    font-size: 1em;
+    font-weight: 400;
+    padding-left: 0.4em;
+  }
   .child-nav {
     grid-column: 1;
-    grid-row: 1 / span 16;
+    grid-row: 2 / span 16;
     display: flex;
     align-items: center;
   }
@@ -217,5 +230,6 @@
       grid-template-columns: 2em minmax(0, 1fr) 0.8em minmax(0, 1fr) 0.8em minmax(0, 1fr) 0 0 0 0 0;
     }
     .g3, .g4, .more { display: none; }
+    .gen-label.g3, .gen-label.g4 { display: none; }
   }
 </style>

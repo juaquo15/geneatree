@@ -1,8 +1,9 @@
 <script lang="ts">
   import { app } from '../store/app.svelte';
-  import { birthSummary, deathSummary, fold, fullName, sortName } from '../model/format';
+  import { birthParts, fold, fullName, listName, sortName } from '../model/format';
   import type { Person } from '../model/types';
 
+  const SEX_LABEL = { M: 'Hombre', F: 'Mujer', U: '' } as const;
   type SortBy = 'name' | 'rin';
   let sortBy = $state<SortBy>('name');
   let query = $state('');
@@ -130,8 +131,9 @@
   <div class="head row" role="row">
     <button class:active={sortBy === 'rin'} onclick={() => (sortBy = 'rin')}>RIN</button>
     <button class:active={sortBy === 'name'} onclick={() => (sortBy = 'name')}>Nombre completo</button>
-    <span>Nacimiento / Bautizo</span>
-    <span>Defunción / Sepultación</span>
+    <span>Sexo</span>
+    <span class="date">Nacimiento - Fecha</span>
+    <span>Nacimiento - Lugar</span>
   </div>
 
   <div
@@ -146,8 +148,7 @@
     <div class="row probe" bind:this={probe} aria-hidden="true"><span>0</span></div>
     <div style="height:{sorted.length * rowH}px; position:relative">
       {#each visible as p, k (p.id)}
-        {@const b = birthSummary(p)}
-        {@const d = deathSummary(p)}
+        {@const b = birthParts(p)}
         <div
           class="row item"
           class:selected={p.id === app.selectedId}
@@ -160,9 +161,10 @@
           onkeydown={() => {}}
         >
           <span class="rin">{p.rin}</span>
-          <span class="name">{p.surname}{p.surname2 ? ' ' + p.surname2 : ''}{p.givenNames ? ', ' + p.givenNames : ''}{p.title ? ` (${p.title})` : ''}</span>
-          <span>{b.text}{b.fromAlt ? ' *' : ''}</span>
-          <span>{d.text}{d.fromAlt ? ' *' : ''}</span>
+          <span class="name">{listName(p)}</span>
+          <span>{SEX_LABEL[p.sex]}</span>
+          <span class="date">{b.date}{b.fromAlt && b.date ? ' *' : ''}</span>
+          <span>{b.place}{b.fromAlt && !b.date && b.place ? ' *' : ''}</span>
         </div>
       {/each}
     </div>
@@ -197,7 +199,7 @@
   .count { color: var(--muted); }
   .row {
     display: grid;
-    grid-template-columns: 5em minmax(0, 2.2fr) minmax(0, 1.5fr) minmax(0, 1.5fr);
+    grid-template-columns: 5em minmax(0, 2.4fr) 6em minmax(0, 1.3fr) minmax(0, 1.6fr);
     gap: 0.6em;
     align-items: center;
     padding: 0.15em 0.5em;
@@ -232,10 +234,11 @@
     cursor: pointer;
   }
   .item.selected { background: var(--sel); color: var(--sel-ink); }
+  .date { text-align: right; }
   .rin { text-align: right; color: inherit; opacity: 0.75; }
   .hint { margin: 0; color: var(--muted); font-size: 0.85em; }
   @media (max-width: 760px) {
     .row { grid-template-columns: 3.5em minmax(0, 1fr) 7em; }
-    .row > :nth-child(4) { display: none; }
+    .row > :nth-child(3), .row > :nth-child(5) { display: none; }
   }
 </style>

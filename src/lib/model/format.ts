@@ -8,9 +8,24 @@ export function fullName(p: Person | undefined): string {
   return [p.title, p.givenNames, p.surname, p.surname2, p.suffix].filter(Boolean).join(' ');
 }
 
-/** Clave de orden alfabético como PAF: apellidos, luego nombre; sin tildes. */
+/** Clave de orden como PAF: apellido, nombre, luego el sufijo (donde PAF guarda el materno); sin tildes. */
 export function sortName(p: Person): string {
-  return fold(`${p.surname} ${p.surname2} ${p.givenNames}`).replace(/\s+/g, ' ');
+  return fold(`${p.surname} ${p.givenNames} ${p.surname2} ${p.suffix}`).replace(/\s+/g, ' ');
+}
+
+/** "Apellido, Nombre Materno", el nombre completo de la lista de PAF (sin título). */
+export function listName(p: Person): string {
+  const rest = [p.givenNames, p.surname2, p.suffix].filter(Boolean).join(' ');
+  return [p.surname, rest].filter(Boolean).join(', ');
+}
+
+/** Fecha y lugar de nacimiento (o bautizo, con fromAlt) por separado, para las columnas de la lista. */
+export function birthParts(p: Person): { date: string; place: string; fromAlt: boolean } {
+  const b = event(p, 'BIRT');
+  if (b?.date || b?.place) return { date: b.date?.text ?? '', place: b.place ?? '', fromAlt: false };
+  const c = event(p, 'CHR');
+  if (c?.date || c?.place) return { date: c.date?.text ?? '', place: c.place ?? '', fromAlt: true };
+  return { date: '', place: '', fromAlt: false };
 }
 
 export function fold(s: string): string {

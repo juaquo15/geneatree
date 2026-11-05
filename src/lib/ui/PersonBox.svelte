@@ -1,17 +1,18 @@
 <script lang="ts">
   import type { Person } from '../model/types';
-  import { birthSummary, deathSummary, fullName, lifeYears } from '../model/format';
+  import { birthSummary, deathSummary, fullName } from '../model/format';
   import { app } from '../store/app.svelte';
 
   interface Props {
     person: Person | undefined;
     /** Texto si no hay persona (p.ej. "Padre"). */
     placeholder?: string;
-    compact?: boolean;
+    /** Una sola línea con el nombre, como el pedigrí de PAF. */
+    nameOnly?: boolean;
     /** Si el lugar está vacío, muestra un botón para agregar a alguien. */
     onadd?: () => void;
   }
-  let { person, placeholder = '', compact = false, onadd }: Props = $props();
+  let { person, placeholder = '', nameOnly = false, onadd }: Props = $props();
 
   const birth = $derived(person ? birthSummary(person) : undefined);
   const death = $derived(person ? deathSummary(person) : undefined);
@@ -22,7 +23,7 @@
   <button
     type="button"
     class="box"
-    class:compact
+    class:name-only={nameOnly}
     class:selected={app.selectedId === person.id}
     data-person={person.id}
     onclick={(e) => (e.ctrlKey ? app.makePrimary(person.id) : (app.selectedId = person.id))}
@@ -31,17 +32,15 @@
   >
     {#if flagged}<span class="flag" aria-label="Tiene notas o fotos"></span>{/if}
     <span class="name">{fullName(person)}</span>
-    {#if compact}
-      {#if lifeYears(person)}<span class="line">{lifeYears(person)}</span>{/if}
-    {:else}
+    {#if !nameOnly}
       {#if birth?.text}<span class="line">{birth.text}{birth.fromAlt ? ' *' : ''}</span>{/if}
       {#if death?.text}<span class="line">{death.text}{death.fromAlt ? ' *' : ''}</span>{/if}
     {/if}
   </button>
 {:else if onadd}
-  <button type="button" class="box empty add" class:compact onclick={onadd}>＋ Agregar {placeholder.toLowerCase()}</button>
+  <button type="button" class="box empty add" class:name-only={nameOnly} onclick={onadd} aria-label={nameOnly ? `＋ Agregar ${placeholder.toLowerCase()}` : undefined}><span class="hint">＋ Agregar {placeholder.toLowerCase()}</span></button>
 {:else}
-  <div class="box empty" class:compact>{placeholder}</div>
+  <div class="box empty" class:name-only={nameOnly}>{nameOnly ? '' : placeholder}</div>
 {/if}
 
 <style>
@@ -62,13 +61,18 @@
     cursor: pointer;
     overflow: hidden;
   }
-  .box.compact {
-    min-height: 0;
-    font-size: 0.8em;
+  .box.name-only {
+    min-height: 1.85em;
     gap: 0;
-    padding: 0.1em 0.4em;
-    line-height: 1.2;
+    padding: 0.15em 0.6em;
   }
+  .box.name-only.add {
+    justify-content: flex-start;
+    border-style: solid;
+  }
+  .box.name-only .hint { visibility: hidden; }
+  .box.name-only.add:hover .hint,
+  .box.name-only.add:focus-visible .hint { visibility: visible; }
   .box.empty {
     color: var(--muted);
     cursor: default;
