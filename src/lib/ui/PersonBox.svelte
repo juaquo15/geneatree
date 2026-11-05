@@ -52,7 +52,7 @@
     align-items: flex-start;
     gap: 0.15em;
     width: 100%;
-    min-height: 3.6em;
+    min-height: 4.3em;
     padding: 0.35em 0.6em;
     border: 1px solid var(--line);
     background: var(--box);

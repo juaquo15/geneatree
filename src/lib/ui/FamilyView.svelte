@@ -117,7 +117,7 @@
 
     {#if fam}
       <button type="button" class="marriage" onclick={() => (app.dialog = { type: 'edit-family', familyId: fam.id })} title="Editar matrimonio e hijos">
-        Matrimonio: {eventText(marriage) || '—'}
+        Matrimonio: {marriage?.date?.text ?? ''}
       </button>
     {:else}
       <div class="marriage">Sin cónyuge registrado</div>
@@ -129,9 +129,7 @@
         {#if spouse}
           <button class="mini" onclick={add.otherSpouse} title="Agregar otro cónyuge">＋ Otro</button>
         {/if}
-        {#if fams.length > 1}
-          <button class="mini" onclick={nextSpouse} title="Mostrar otro cónyuge" aria-label="Mostrar otro cónyuge">⇕</button>
-        {/if}
+        <button class="mini" onclick={nextSpouse} disabled={fams.length < 2} title="Mostrar otro cónyuge" aria-label="Mostrar otro cónyuge">⇕</button>
       </span>
     </div>
     <div class="spouse">
@@ -174,7 +172,8 @@
               ondblclick={(e) => (e.ctrlKey ? toChild(k.id) : (app.dialog = { type: 'edit-person', personId: k.id }))}
             >
               <span class="num">{i + 1}</span>
-              <span class="kname">{fullName(k)}{#if k.notes.trim() || k.media.length}<span class="dot" aria-label="Tiene notas">▪</span>{/if}</span>
+              {#if k.notes.trim() || k.media.length}<span class="flag" aria-label="Tiene notas o fotos"></span>{/if}
+              <span class="kname">{fullName(k)}</span>
               <span class="born">{birthDate(k)}</span>
               <span class="link">{pedigreeOf(k.id)}</span>
             </button>
@@ -341,7 +340,17 @@
   li.selected .row { background: var(--sel); color: var(--sel-ink); }
   .row:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
   .kname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dot { margin-left: 0.3em; font-size: 0.8em; }
+  .row { position: relative; padding-top: 0.3em; padding-bottom: 0.3em; }
+  .flag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-style: solid;
+    border-width: 0 0.7em 0.7em 0;
+    border-color: transparent var(--ink) transparent transparent;
+  }
+  li.selected .flag { border-right-color: var(--sel-ink); }
+  .mini:disabled { color: var(--muted); cursor: default; }
 
   @media (max-width: 760px) {
     .family {

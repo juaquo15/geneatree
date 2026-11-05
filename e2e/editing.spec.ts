@@ -150,5 +150,5 @@ test('editar matrimonio desde la vista Familia', async ({ page }) => {
   await expect(dialog(page)).toContainText('Familia · MRIN 1');
   await page.getByLabel('Fecha de matrimonio', { exact: true }).fill('12 Feb 1951');
   await save(page);
-  await expect(page.locator('.marriage')).toContainText('12 Feb 1951 - Pueblo Imaginario');
+  await expect(page.locator('.marriage')).toContainText('12 Feb 1951');
 });

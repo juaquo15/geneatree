@@ -11,7 +11,7 @@ test('F-04 vista Familia muestra padres, cónyuge, hijos y matrimonio', async ({
   await expect(page.locator('.dad')).toContainText('Capitán Diego Antiguo');
   await expect(page.locator('.mom')).toContainText('＋ Agregar madre');
   await expect(page.locator('.spouse')).toContainText('María Ejemplo Prueba');
-  await expect(page.locator('.marriage')).toContainText('Entre 1950 y 1952 - Pueblo Imaginario');
+  await expect(page.locator('.marriage')).toContainText('Entre 1950 y 1952');
   await expect(page.locator('.children-list')).toContainText('Pedro Ficticio Ejemplo');
   await expect(page.locator('.statusbar')).toContainText('RIN: 1');
 });
