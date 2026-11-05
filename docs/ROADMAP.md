@@ -8,7 +8,7 @@ con respaldo automático.
 cada fase tiene criterios de aceptación verificables por test o comparando contra PAF 5
 (instalado en el equipo de desarrollo), en vez de depender de su opinión.
 
-Estado: ✅ hecho · 🔜 siguiente · ⬜ pendiente
+Estado: ✅ hecho · 🔶 probado en local, falta en Supabase · 🔜 siguiente · ⬜ pendiente
 
 ---
 
@@ -75,11 +75,11 @@ Dos proyectos gratuitos: **`geneatree-prod`** (datos reales) y **`geneatree-test
 (solo datos ficticios, para CI). Las claves `service_role` nunca salen del equipo
 local ni de los secretos de GitHub.
 
-- ⬜ Esquema SQL versionado en `supabase/migrations/`:
+- ✅ Esquema SQL versionado en `supabase/migrations/` (probado en PGlite; falta aplicarlo a Supabase):
   `trees`, `tree_members (tree_id, user_id, role: owner|editor|viewer)`,
   `persons`, `families`, `family_children`, `events`, `media`, `change_log`
-- ⬜ RLS en **todas** las tablas; ninguna tabla accesible a `anon`
-- ⬜ Privacidad de vivos: los `viewer` ven a una persona viva solo como
+- ✅ RLS en **todas** las tablas; ninguna tabla accesible a `anon`
+- ✅ Privacidad de vivos (vistas `*_visible`, `refresh_living`, `living_override` solo del dueño): los `viewer` ven a una persona viva solo como
   "Persona viva" + vínculos (sin fechas, lugares ni notas). Regla: sin defunción y
   nacida hace < 110 años, o sin fechas pero con descendientes/padres recientes
 - ⬜ Login con correo + contraseña, sesión larga ("recordarme"); **registro
@@ -177,13 +177,13 @@ vista de descendencia · búsqueda fonética (Soundex) · reportes adicionales.
 | S-03 | Dependencias sin vulnerabilidades altas/críticas | CI (`npm audit`) + Dependabot | ✅ |
 | S-04 | XSS: una nota GEDCOM con `<script>`, `<img onerror>` o `javascript:` se muestra como texto | e2e | ✅ |
 | S-05 | CSP activa: sin scripts inline ni externos; `connect-src` solo a Supabase | e2e | ✅ (falta agregar Supabase en H2) |
-| S-06 | Usuario anónimo no lee ninguna tabla | integración (`geneatree-test`) | ⬜ |
-| S-07 | Usuario de otro árbol no lee ni escribe este árbol | integración | ⬜ |
-| S-08 | `viewer` no puede escribir; no ve fechas/lugares/notas de vivos | integración | ⬜ |
-| S-09 | `editor` no puede cambiar roles ni borrar el árbol | integración | ⬜ |
+| S-06 | Usuario anónimo no lee ninguna tabla | integración (PGlite; falta `geneatree-test`) | 🔶 |
+| S-07 | Usuario de otro árbol no lee ni escribe este árbol | integración (PGlite) | 🔶 |
+| S-08 | `viewer` no puede escribir; no ve fechas/lugares/notas de vivos | integración (PGlite) | 🔶 |
+| S-09 | `editor` no puede cambiar roles ni borrar el árbol | integración (PGlite) | 🔶 |
 | S-10 | Registro público deshabilitado; invitación expira | integración | ⬜ |
 | S-11 | Fotos: bucket privado, URL firmada expira, sin listado público | integración | ⬜ |
-| S-12 | `change_log` no editable por usuarios (solo inserción vía trigger) | integración | ⬜ |
+| S-12 | `change_log` no editable por usuarios (solo inserción vía trigger) | integración (PGlite) | 🔶 |
 | S-13 | Archivo GEDCOM malicioso (enorme, niveles absurdos, refs circulares) no cuelga la app | unidad | ⬜ |
 | S-14 | La clave `service_role` no aparece en el bundle publicado | CI (busca en `dist/`) | ⬜ |
 | S-15 | Revisión manual de RLS + `/security-review` antes de entregar | manual | ⬜ |
