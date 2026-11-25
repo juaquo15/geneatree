@@ -75,7 +75,9 @@ Dos proyectos gratuitos: **`geneatree-prod`** (datos reales) y **`geneatree-test
 (solo datos ficticios, para CI). Las claves `service_role` nunca salen del equipo
 local ni de los secretos de GitHub.
 
-- ✅ Esquema SQL versionado en `supabase/migrations/` (probado en PGlite; falta aplicarlo a Supabase):
+- ✅ Esquema SQL versionado en `supabase/migrations/` (probado en PGlite y Postgres 17; falta aplicarlo a Supabase).
+  Incluye los campos que el GEDCOM necesita para exportar sin pérdida (orden de matrimonios,
+  `CHAN`, orden y tags de fotos):
   `trees`, `tree_members (tree_id, user_id, role: owner|editor|viewer)`,
   `persons`, `families`, `family_children`, `events`, `media`, `change_log`
 - ✅ RLS en **todas** las tablas; ninguna tabla accesible a `anon`
@@ -84,10 +86,13 @@ local ni de los secretos de GitHub.
   nacida hace < 110 años, o sin fechas pero con descendientes/padres recientes
 - ⬜ Login con correo + contraseña, sesión larga ("recordarme"); **registro
   cerrado** (solo por invitación del dueño)
-- ⬜ Script local `scripts/migrate.ts`: GEDCOM → Supabase, idempotente por `_UID`
-  (se puede repetir sin duplicar)
-- ⬜ Acción programada (GitHub Actions, cada 3 días) que hace una consulta liviana
-  para que el proyecto gratuito no se pause
+- 🔶 Script local `scripts/migrate.ts` (`npm run migrate`): GEDCOM → Supabase, idempotente por `_UID`;
+  repetirlo no escribe nada si no hubo cambios, `--prune` manda a la papelera lo que ya no está,
+  `--dry-run` y verificación de conteos (si no coinciden, no guarda). Probado en PGlite (F-41) y en
+  Postgres 17 con 32.500 personas sintéticas: 29 s la primera carga, 6 s al repetir. Falta correrlo contra Supabase.
+  Ver [`docs/SUPABASE.md`](SUPABASE.md)
+- 🔶 Acción programada (`keepalive.yml`, cada 3 días) que llama a `public.ping()` (lo único que
+  `anon` puede ejecutar) para que el proyecto gratuito no se pause. Falta cargar los secretos
 - ⬜ Respaldo semanal: exportar a GEDCOM y guardar en un bucket privado (y copia
   descargable por el dueño desde la app)
 
@@ -165,7 +170,7 @@ vista de descendencia · búsqueda fonética (Soundex) · reportes adicionales.
 | F-20 | Motor de edición: vínculos siempre bidireccionales, deshacer exacto, restaurar sin pisar ediciones posteriores | unidad | ✅ |
 | F-30–35 | Offline: editar sin red, reabrir, sincronizar, resolver conflicto | e2e | ⬜ |
 | F-40 | Ida y vuelta GEDCOM sin pérdida | unidad | ⬜ |
-| F-41 | Migración idempotente: correrla dos veces no duplica | integración | ⬜ |
+| F-41 | Migración idempotente: correrla dos veces no duplica | integración (PGlite) | ✅ |
 | P-01 | Archivo real (32k) con CPU ×6: abrir 1,6 s · navegar 31 ms · buscar en notas 0,5 s · guardar 0,4 s | e2e local (`GED_PATH`) | ✅ |
 
 ### Seguridad

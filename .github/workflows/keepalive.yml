@@ -1,0 +1,37 @@
+name: Supabase despierto
+
+# El plan gratuito de Supabase pausa el proyecto tras 7 días sin actividad.
+# Cada 3 días se llama a `public.ping()` (migración 20261125000100_ping.sql).
+# Si falla, GitHub avisa por correo al dueño del repo.
+#
+# Requiere los secretos SUPABASE_URL (https://<ref>.supabase.co) y
+# SUPABASE_ANON_KEY (la clave pública "anon", nunca la service_role).
+
+on:
+  schedule:
+    - cron: '17 9 */3 * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Llamar a ping()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::notice::Faltan los secretos SUPABASE_URL / SUPABASE_ANON_KEY; nada que hacer."
+            exit 0
+          fi
+          out=$(curl -fsS --retry 3 --retry-all-errors --max-time 30 \
+            -X POST "$SUPABASE_URL/rest/v1/rpc/ping" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json" -d '{}')
+          echo "Respuesta: $out"
+          [ "$out" = "true" ]
