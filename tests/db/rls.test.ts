@@ -1,26 +1,6 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { PGlite } from '@electric-sql/pglite';
+import type { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-
-// Corre las migraciones reales sobre Postgres en WASM (PGlite). Simula lo que
-// Supabase aporta: el esquema `auth`, los roles anon/authenticated y los
-// privilegios por defecto que Supabase concede a tablas y funciones nuevas.
-
-const MIGRATIONS = fileURLToPath(new URL('../../supabase/migrations/', import.meta.url));
-
-const PREAMBLE = `
-  create schema auth;
-  create table auth.users (id uuid primary key);
-  create function auth.uid() returns uuid language sql stable as
-    $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
-  create role anon nologin;
-  create role authenticated nologin;
-  grant usage on schema public, auth to anon, authenticated;
-  grant execute on function auth.uid() to anon, authenticated;
-  alter default privileges in schema public grant all on tables to anon, authenticated;
-  alter default privileges in schema public grant all on functions to anon, authenticated;
-`;
+import { freshDb } from './pglite';
 
 const OWNER = '00000000-0000-0000-0000-00000000000a';
 const EDITOR = '00000000-0000-0000-0000-00000000000b';
@@ -82,11 +62,7 @@ function as<T>(uid: string | null, fn: (q: Q) => Promise<T>, role: 'authenticate
 const ids = (rows: Record<string, unknown>[]) => rows.map((r) => r.id as string).sort();
 
 beforeAll(async () => {
-  db = new PGlite();
-  await db.exec(PREAMBLE);
-  for (const f of readdirSync(MIGRATIONS).filter((n) => n.endsWith('.sql')).sort()) {
-    await db.exec(readFileSync(MIGRATIONS + f, 'utf8'));
-  }
+  db = await freshDb();
   await db.exec(SEED);
 }, 60_000);
 
@@ -103,6 +79,13 @@ describe('S-06 usuario anónimo', () => {
   it('no puede ejecutar las funciones de apoyo', async () => {
     await expect(as(null, (q) => q(`select public.refresh_living('${T1}')`), 'anon')).rejects.toThrow(/permission denied/);
     await expect(as(null, (q) => q(`select public.my_role('${T1}')`), 'anon')).rejects.toThrow(/permission denied/);
+  });
+  it('solo puede ejecutar ping(), que no revela nada', async () => {
+    expect(await as(null, (q) => q(`select public.ping() as ok`), 'anon')).toEqual([{ ok: true }]);
+    const fns = await db.query<{ name: string }>(`
+      select p.proname as name from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')`);
+    expect(fns.rows.map((r) => r.name)).toEqual(['ping']);
   });
 });
 

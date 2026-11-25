@@ -12,7 +12,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "migrate": "tsx scripts/migrate.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.17",
@@ -20,8 +21,11 @@
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tsconfig/svelte": "^5.0.9",
     "@types/node": "^24.19.2",
+    "@types/pg": "8.23.1",
+    "pg": "8.23.1",
     "svelte": "^5.59.1",
     "svelte-check": "^4.7.8",
+    "tsx": "4.23.15",
     "typescript": "~6.0.3",
     "vite": "^8.3.8",
     "vitest": "^5.1.1",
